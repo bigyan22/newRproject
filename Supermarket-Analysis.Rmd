@@ -1,0 +1,300 @@
+---
+title: "Supermarket Sales Exploratory Data Analysis"
+author: "Bigyan Mishra"
+date: Sys.time()
+output:
+  word_document: default
+  html_document: default
+  
+---
+
+ 
+
+# Overview
+ 
+ The Supermarket dataset analysis is a comprehensive examination of the sales and customer behavior data collected from a supermarket. This analysis aims to uncover patterns, trends, and insights that can help improve the supermarket's operations, marketing strategies, and customer satisfaction. The dataset typically includes various attributes such as product details, sales figures, customer demographics, purchase dates, and payment methods. By analyzing this data, businesses can make informed decisions to enhance their performance and better cater to their customers' needs.
+
+
+# Background Information
+
+## Dataset Source
+
+The Supermarket dataset used for this analysis is sourced from Kaggle, a popular platform for data science competitions and datasets. Kaggle provides a rich repository of datasets that are publicly available for data science and machine learning practitioners to practice their skills and build models. The Supermarket dataset is one such dataset that includes transactional data from a supermarket.
+
+
+## Dataset Description
+
+This dataset typically include the 1000 rows following by the 17 columns.
+
+- Invoice ID: A unique identifier for each transaction.
+
+- Branch: Indicates which branch of the supermarket the transaction occurred in.
+
+- City: The city where the supermarket branch is located.
+
+- Customer Type: Categorizes customers as members or normal (non-members).
+
+- Gender: Gender of the customer.
+
+- Product Line: Categories of products sold (e.g., Health and beauty, Electronic accessories).
+
+- Unit Price: Price per unit of the product.
+
+- Quantity: Number of units purchased.
+
+- Tax 5%: Amount of tax applied to the purchase.
+
+- Total: Total amount paid, including tax.
+
+- Date: Date of the transaction.
+
+- Time: Time of the transaction.
+
+- Payment: Mode of payment (e.g., Cash, Credit card, E-wallet).
+
+- COGS: Cost of goods sold.
+
+- Gross Margin Percentage: Percentage of gross margin.
+
+- Gross Income: Gross income from the transaction.
+
+
+## Objectives 
+
+The analysis of the supermarket dataset aims to achieve several key objectives that provide valuable insights into sales performance, customer behavior, and operational efficiency
+
+i. Sales Performance Analysis: Understanding overall sales performance, identifying top-selling products, and determining the most profitable product lines.
+
+ii. Customer Demographics and Behavior: Gaining insights into customer demographics and purchase behaviors to tailor marketing strategies.
+
+iii. Branch and City Analysis: Comparing performance across different branches and cities to identify areas of strength and opportunities for improvement.
+
+iv. Payment Method Analysis: Analyzing the usage patterns of different payment methods to streamline payment processes.
+
+v. Temporal Analysis: Investigating sales trends over different times of the day, days of the week, and months to optimize staffing and inventory.
+
+vi. Customer Satisfaction: Evaluating customer satisfaction levels based on ratings and identifying areas for service improvement.
+
+
+# Methodology
+
+## Data Processing
+
+```{r message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+library(readr)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+```
+
+
+### Loading the dataset
+```{r message=FALSE, warning=FALSE}
+data <- read.csv("supermarket_sales.csv")
+```
+
+### Checking the null values of the dataset
+```{r message=FALSE, warning=FALSE}
+sum(is.na(data))
+```
+So there is no any missing values in the dataset .So our dataset is almost clean.
+
+### Removing the Unnecessary columns from the dataset
+Here we found that the Invoice ID, Date and Time are unnecessary. So we have to drop it out  from the Dataset.
+
+```{r message=FALSE, warning=FALSE}
+data <- subset ( data, select = -c(Invoice.ID, Date, Time))
+
+```
+
+Here, again we have seen that the Gross margin percentage columns contains almost same value. So, checking the unique values from this columns
+
+```{r message=FALSE, warning=FALSE}
+unique(data$gross.margin.percentage)
+```
+
+So, here all the values of this columns are same. 
+
+### Removing the columns
+So, I drop this column as it is unnecessary for the future analysis.
+```{r message=FALSE, warning=FALSE}
+data <- subset(data, select = -c(gross.margin.percentage))
+```
+### Cleaning the names of the dataset
+```{r warning=FALSE, message=FALSE}
+data <- data %>% 
+  clean_names()
+```
+
+## Data Analysis 
+
+
+## Analysis of Gender ration in Supermarket Sales
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+gender_counts <- table(data$gender)
+pie(gender_counts, labels = paste(names(gender_counts), round(100 * gender_counts / sum(gender_counts), 1), "%"),
+    col = c("#ff9999", "#66b3ff"), main = "Male and Female Ratio in Supermarket Sales")
+  
+```
+**Interpretation:**
+The pie chart visualize the distribution of genders in the dataset. From the chart, we can see that there are more female customers than male customers. The labels on the pie chart slices show the percentage of total customers that each gender represents.
+
+## Analysis of product line with Males customers
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+male_data <- data[data$gender == "Male", ]
+
+unique_product_lines <-unique(data$product_line)
+
+product_counts <- table(factor(male_data$product_line, levels = unique_product_lines))
+
+barplot(product_counts,
+        las = 2,
+        main = "Product Line Counts for Males",
+        ylab = "Count",
+        col = c("red", "blue", "yellow", "green", "black", "brown"), cex.names = 0.53)
+```
+**Interpretation:**
+
+The results reveal that "Health and Beauty" is the most popular product line among male customers, suggesting a strong demand for personal grooming and wellness products in this category. This high bills figure indicates that males are investing significantly in health and beauty items such as skincare, grooming products, and personal care essentials. In contrast, "Sports and Travel" shows the lowest sales, which may reflect a lower level of interest or frequency in purchasing sports gear and travel accessories among male customers. This disparity highlights a preference for everyday health and grooming needs over specialized sports and travel items, suggesting that marketing strategies should focus on expanding and promoting health and beauty products while exploring ways to enhance the appeal of sports and travel products.
+
+
+## Analysis of product lines with Females customers
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+female_data <- data[data$gender == "Female", ]
+
+unique_product_lines <- unique(data$product_line)
+
+product_counts <- table(factor(female_data$product_line, levels = unique_product_lines))
+
+barplot(product_counts,
+        las=2,
+        main = "Product Line Counts for Females",
+         ylab = "Count",
+        col = c("red", "yellow", "black","green", "pink", "brown"), 
+        cex.names = 0.53)
+```
+**Interpretation:**
+The analysis reveals that female customers have the highest total Sales for "Fashion Accessories," indicating a strong preference and significant investment in items such as jewelry and bags that enhance personal style. In contrast, "Health and Beauty" products show the lowest total Sales, suggesting a lower level of spending on skincare and grooming essentials. This disparity highlights that while female customers are keen on fashion-related purchases, they allocate less of their budget towards health and beauty products. Consequently, marketing strategies should focus on expanding and promoting fashion accessories to match this high demand, while also exploring ways to increase the appeal of health and beauty items to potentially boost their sales
+
+## Analysis of different product lines by total sales
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+total_bill <- tapply(data$total, data$product_line, sum)
+
+barplot(total_bill, las=2, col=c("red", "green", "yellow", "black", "brown", "grey"), cex.names = 0.53, main="Totals salescount for different product line")
+```
+**Interpretation:**
+From the bar plot, we can observe significant variations of total Sales across different product lines. The bar for "Food and Beverages" is the tallest, it indicates that this category generates the highest revenue. This could be due to the essential nature of food and beverages, which are frequently purchased items.
+
+
+
+## Analysis of different customers for different cities
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+countss <-data.frame(table(data$city))
+colnames(countss) <- c("City", "Customers")
+countss
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+barplot(countss$Customers,
+        names.arg=countss$City, 
+        col=c("yellow", "green", "red"), main="Distributions of Customers by Cities", xlab="Cities", ylab="No. Of Customers")
+```
+**Interpretation:**
+The data reveals that Yangon has the highest  customers, with a total of 340, indicating that customers in Yangon are spending more compared to those in Mandalay (332) and Naypyitaw (328). This suggests that Yangon customers have a higher level of expenditure, reflecting greater purchasing power or more frequent purchases. Mandalay and Naypyitaw, with slightly lower total Sales, show less overall spending. This distribution points to a potential opportunity for businesses to tailor their marketing strategies and product offerings to the higher spending tendencies observed in Yangon, while also considering ways to boost sales in Mandalay and Naypyitaw.
+
+
+## Analysis of different payment method
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+payment <- table(data$payment)
+
+barplot(payment, col=c("red", "green", "yellow"), xlab= "Payment Method", ylab="Index", main="Distributions of different Payment Methods")
+```
+
+**Interpretation:**
+The results show that Ewallet is the most popular payment method, with 345 bills paid through this option, indicating a strong preference and convenience among customers for digital transactions. Cash payments follow closely with 344 bills, reflecting a significant but slightly lesser inclination towards traditional payment methods. Credit Card payments, while still notable, are the least used with 311 bills paid through this method. This distribution suggests that customers are increasingly favoring Ewallet for its ease and efficiency, with cash remaining a prevalent choice, and credit cards being used less frequently. Businesses should consider promoting Ewallet options and enhancing their digital payment infrastructure, while still accommodating cash and credit card preferences to cater to a diverse customer base.
+
+## Analysis of different Payment Methods by Total Sales
+```{r echo=FALSE, warning=FALSE}
+bill <- tapply(data$total, data$payment, sum)
+bill
+barplot(bill, col=c("Red", "Green", "Blue"), xlab="Payment Methods", ylab="Total Bills", main="Distribution of Total sales by different Payment Methods")
+```
+**Interpretation:**
+
+The data shows that cash transactions result in the highest average total sales compared to credit card and ewallet payments. This suggests that customers using cash may be more likely to spend more per transaction, possibly due to the immediacy and tangibility of cash. Alternatively, it could indicate that those who use cash are engaging in higher-value purchases or have different spending behaviors compared to those using credit cards or ewallets.
+
+
+
+## Analysis of ratings for different product lines
+For this, we have to find out the mean of rating for each of the product line.
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+mean_rating <- tapply(data$rating, data$product_line, mean)
+mean_rating
+barplot(mean_rating, las=2, cex.axis = 0.02, 
+        col=c("green", "yellow", "red", "brown", "pink", "black"), cex.names = 0.53,xlab="Product Lines", ylab="Mean Rating", main = "Plot of Rating vs Product lines" )
+```
+**Interpretation:**
+The plot reveals that "Food and Beverages" has the highest average rating, indicating that customers generally have a more favorable opinion of this product category compared to others. The barplot visually illustrates this by showing the highest bar for Food and Beverages, suggesting superior customer satisfaction with these products relative to other categories. This insight highlights the success and positive reception of the Food and Beverages line, which could inform future marketing and product development strategies.
+
+## Analysis of gross income by different product lines
+Here we also have to find the mean income of the different product line
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+mean_income <- tapply(data$gross_income, data$product_line, mean )
+mean_income
+barplot(mean_income, las=2, cex.axis = 0.002, 
+        col=c("brown", "black", "yellow", "green", "red", "pink"), cex.names=0.53, xlab="Product lines", ylab="Mean Gross Income", main="Distibution of gross income by differeny Product lines")
+```
+**Interpretation:**
+The analysis shows that "Home and Lifestyle" has the highest gross income among all product lines, indicating that this category generates the most revenue. This suggests that customers are investing significantly in products related to home improvement and lifestyle enhancements, such as furniture, décor, and household essentials. The high gross income for Home and Lifestyle reflects its strong market appeal and consumer demand, signaling its importance in the overall sales strategy. This insight emphasizes the success of this product line and suggests that continuing to focus on and expand offerings in this category could further capitalize on its revenue potentia.
+
+## Analysis of customers types and total bills
+```{r warning=FALSE ,message=FALSE, echo=FALSE}
+customers <- data %>% 
+  group_by(customer_type) %>% 
+  summarise(count=n())
+
+customers_tot <- tapply(data$total, data$customer_type, mean)
+
+
+barplot(customers_tot, col=c("red", "green"), xlab="Customers Type", ylab="Average Total Bills", main="Distribution of Total Sales by Customers types")
+```
+**Interpretation:**
+The analysis reveals that the average total Sales are greater for members compared to normal (non-member) customers, it suggests that members tend to spend more on their purchases. This could be due to membership benefits such as discounts, loyalty points, or exclusive deals that incentivize higher spending. Members might also feel a greater sense of loyalty to the store, leading them to purchase more frequently or in larger quantities. On the other hand, normal customers, lacking these incentives, might be more price-sensitive or less frequent shoppers, resulting in lower average total bills. This insight can guide the supermarket in enhancing its membership programs and targeting marketing strategies to boost sales further.
+
+## Checking the relationship
+
+### Relationship between the quantity and total bills
+
+```{r message=FALSE, warning=FALSE}
+cor(data$quantity, data$total)
+```
+**Interpretation:**
+A correlation coefficient between quantity and total bills indicates a strong positive relationship between the two variables. This means that as the quantity of items purchased increases, the total bills also tend to increase. The positive correlation suggests that higher quantities of items purchased generally lead to higher total expenditures, reflecting a direct link between the number of items bought and the amount spent. 
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+plot(data$quantity, data$total, xlab = "Quantity", ylab="Total Bills")
+```
+
+## Relationship between the cogs and unit price
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+cor(data$unit_price, data$cogs)
+
+plot(data$unit_price, data$cogs, xlab="Unit Price", ylab = "COGS", main="Plot of Unit proce vs COGS")
+```
+**Interpretation:**
+The moderate positive correlation  between unit price and COGS (Cost of Goods Sold) indicates that as the unit price of products increases, the overall costs also tend to increase. This relationship suggests that higher prices per unit contribute significantly to the total cost of goods sold, but not in a perfectly linear fashion. Therefore, while an increase in unit prices generally leads to higher overall costs, other factors such as quantity and product mix also play a role in determining the final COGS. This correlation highlights the importance of managing unit prices to control overall costs effectively.
+
+
+
+# Limitations
+
+**Limited Time Frame:** Data might only cover a specific period, which may not be representative of long-term trends.
+
+**Contextual Information:** Missing external factors like economic conditions, seasonal effects, or marketing campaigns that can influence sales.
+
+
+# Conclusion
+thank you
